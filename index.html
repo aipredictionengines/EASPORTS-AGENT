@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06101a">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<title>ESPORTS AGENT v0.3 — Mobile Inbox + Early Reaction</title>
+<style>
+:root{--bg:#06101a;--panel:#0b1825;--line:#21415a;--txt:#edf7fd;--muted:#83a4b9;--cyan:#4bd7ff;--green:#50e3a4;--yellow:#ffd166;--red:#ff6f7d}
+*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;background:linear-gradient(140deg,#06101a,#07131f 55%,#04101a);color:var(--txt);font-family:Inter,Segoe UI,Arial,sans-serif;font-size:13px}
+.wrap{max-width:1450px;margin:auto;padding:20px;padding-bottom:max(30px,env(safe-area-inset-bottom))}
+.top{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:flex-start}
+h1{font-size:21px;margin:0 0 4px}.sub{color:var(--muted);font-size:11px}.badge{padding:6px 10px;border:1px solid #365063;border-radius:999px;color:var(--yellow);font-size:10px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;margin-top:14px}.c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}.c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:1/-1}
+.card{background:linear-gradient(180deg,rgba(12,26,39,.98),rgba(7,17,27,.98));border:1px solid var(--line);border-radius:13px;padding:14px}
+h2{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--cyan);margin:0 0 10px}
+label{display:block;color:var(--muted);font-size:10px;margin:8px 0 4px}
+input,select,textarea,button{font:inherit}input,select,textarea{width:100%;background:#06111c;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:10px}textarea{min-height:78px;resize:vertical}
+button{background:#113149;border:1px solid #2d617e;color:white;border-radius:8px;padding:9px 11px;cursor:pointer}button:hover{filter:brightness(1.12)}button.primary{background:#08708b;border-color:#0aa0c7}button.danger{background:#40212a;border-color:#743948}button.good{background:#124232;border-color:#2d795b}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.row4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.status{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.45}.ok{color:var(--green)}.warn{color:var(--yellow)}.bad{color:var(--red)}.cyan{color:var(--cyan)}
+.health{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.health div{border:1px solid var(--line);border-radius:8px;padding:8px;background:#06111b}.health b{display:block;font-size:11px}.health span{font-size:9px;color:var(--muted)}
+.marketlist,.inboxlist{max-height:475px;overflow:auto}.market,.inbox{border:1px solid var(--line);border-radius:9px;padding:9px;margin:6px 0;background:#06121d;cursor:pointer}.market:hover,.market.sel,.inbox:hover,.inbox.sel{border-color:var(--cyan)}
+.market .q,.inbox .q{font-weight:650}.meta{font-size:9px;color:var(--muted);margin-top:5px}.pill{display:inline-block;border:1px solid #31536a;border-radius:999px;padding:2px 6px;margin:0 4px 3px 0;font-size:9px}.score{float:right;font-weight:700;font-size:12px;color:var(--yellow)}
+.kpis{display:grid;grid-template-columns:repeat(8,1fr);gap:7px}.kpi{border:1px solid var(--line);background:#06111b;border-radius:9px;padding:9px}.kpi b{font-size:16px;display:block}.kpi span{font-size:9px;color:var(--muted)}
+pre{white-space:pre-wrap;word-break:break-word;background:#040c14;border:1px solid var(--line);border-radius:8px;padding:10px;max-height:520px;overflow:auto;font-size:10px}
+table{width:100%;border-collapse:collapse;font-size:10px}th,td{padding:7px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:var(--muted)}
+.sep{height:1px;background:var(--line);margin:10px 0}.tiny{font-size:9px;color:var(--muted)}a{color:var(--cyan)}
+.evidence{border:1px solid var(--line);border-radius:8px;padding:8px;margin:6px 0;background:#06111b}
+.capture{border-color:#315d74;background:linear-gradient(180deg,#0b2030,#081622)}
+.factorgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:8px}.factor{border:1px solid var(--line);border-radius:8px;padding:7px;background:#06111b;text-align:center}.factor b{display:block;font-size:14px}.factor span{font-size:8px;color:var(--muted)}
+#imagePreview{max-width:100%;max-height:160px;border-radius:8px;margin-top:7px;display:none;border:1px solid var(--line)}
+@media(max-width:980px){.c4,.c5,.c6,.c7,.c8{grid-column:1/-1}.row3,.row4{grid-template-columns:1fr 1fr}.kpis{grid-template-columns:repeat(2,1fr)}.factorgrid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.wrap{padding:10px}.grid{gap:9px}.row,.row3,.row4{grid-template-columns:1fr}.card{padding:11px}.actions button{flex:1 1 46%;min-height:42px}.kpis{grid-template-columns:1fr 1fr}.top{position:sticky;top:0;z-index:5;background:rgba(6,16,26,.96);padding:8px 0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="top">
+  <div><h1>11 — ESPORTS AGENT v0.3</h1><div class="sub">Mobile Inbox + Early Reaction Engine върху v0.2</div></div>
+  <div class="badge">RESEARCH / PAPER ONLY — NO EXECUTION</div>
+ </div>
+
+ <div class="grid">
+  <section class="card capture c12">
+   <h2>0. Mobile Quick Capture — Android Inbox</h2>
+   <div class="row3">
+    <div><label>Game</label><select id="inGame"><option>Auto</option><option>CS2</option><option>LoL</option><option>Dota 2</option><option>Valorant</option><option>Rainbow Six</option><option>Mobile Legends</option></select></div>
+    <div><label>Observed time</label><input id="inTime" type="datetime-local"></div>
+    <div><label>Source type</label><select id="inSource"><option value="UNKNOWN">UNKNOWN</option><option value="OFFICIAL">OFFICIAL</option><option value="TEAM_PLAYER">TEAM / PLAYER</option><option value="STATS">STATS DB</option><option value="NEWS">NEWS</option><option value="SOCIAL">SOCIAL</option><option value="POLYMARKET">POLYMARKET</option></select></div>
+   </div>
+   <label>Quick note — може да е само едно изречение</label>
+   <textarea id="inNote" placeholder="Пример: CS2 — има слух за stand-in при Team X; провери преди мача."></textarea>
+   <div class="row">
+    <div><label>URL (Polymarket / official source / post)</label><input id="inUrl" type="url" placeholder="https://..."></div>
+    <div><label>Screenshot (optional, до 5 MB)</label><input id="inImage" type="file" accept="image/*"></div>
+   </div>
+   <img id="imagePreview" alt="preview">
+   <div class="actions">
+    <button class="good" onclick="saveInbox()">SAVE TO INBOX</button>
+    <button class="primary" onclick="saveAndTriage()">SAVE + GEMINI TRIAGE</button>
+    <button onclick="clearCapture()">Clear</button>
+   </div>
+   <div id="captureStatus" class="status">Inbox и paper logs се пазят локално на устройството. Gemini API key никога не се пази.</div>
+  </section>
+
+  <section class="card c5">
+   <h2>1. Mobile Inbox Queue</h2>
+   <div class="row">
+    <div><label>Status</label><select id="inboxFilter" onchange="renderInbox()"><option value="ALL">ALL</option><option value="NEW">NEW</option><option value="TRIAGED">TRIAGED</option><option value="LINKED">LINKED</option><option value="DONE">DONE</option></select></div>
+    <div><label>Trigger</label><select id="triggerFilter" onchange="renderInbox()"><option value="ALL">ALL</option><option>ROSTER_CHANGE</option><option>STAND_IN</option><option>MAP_VETO</option><option>MATCH_DELAY</option><option>WALKOVER_FORFEIT</option><option>PATCH_META</option><option>OFFICIAL_ANNOUNCEMENT</option><option>PRICE_MOVE</option><option>LIVE_STATE</option><option>OTHER</option><option>UNCLASSIFIED</option></select></div>
+   </div>
+   <div id="inboxList" class="inboxlist"></div>
+   <div class="actions"><button onclick="exportInbox()">Export Inbox</button><button onclick="importInboxPrompt()">Import Inbox</button><input id="inboxImport" type="file" accept=".json,application/json" style="display:none"></div>
+  </section>
+
+  <section class="card c7">
+   <h2>2. Selected Inbox Item / Information Priority</h2>
+   <div id="inboxDetail"><div class="status">Избери Inbox item.</div></div>
+   <div class="factorgrid">
+    <div class="factor"><b id="fNovelty">—</b><span>Novelty</span></div>
+    <div class="factor"><b id="fReliability">—</b><span>Source reliability</span></div>
+    <div class="factor"><b id="fUrgency">—</b><span>Timing urgency</span></div>
+    <div class="factor"><b id="fSensitivity">—</b><span>Market sensitivity</span></div>
+    <div class="factor"><b id="fInfoPriority">—</b><span>Info priority</span></div>
+    <div class="factor"><b id="fImpact">—</b><span>Materiality</span></div>
+   </div>
+   <div class="actions">
+    <button class="primary" onclick="triageSelectedInbox()">Gemini Triage</button>
+    <button onclick="loadInboxPolymarket()">Load Linked Polymarket</button>
+    <button onclick="linkInboxToSelectedMarket()">Link to Selected Market</button>
+    <button onclick="markInboxDone()">Mark Done</button>
+   </div>
+   <div id="triageStatus" class="status">Info Priority = geometric mean of 4 experimental factors. NEEDS BACKTEST.</div>
+  </section>
+
+  <section class="card c4">
+   <h2>3. Connections</h2>
+   <div class="health">
+    <div><b id="gammaHealth">Gamma —</b><span>Discovery</span></div>
+    <div><b id="clobHealth">CLOB —</b><span>Orderbook</span></div>
+    <div><b id="geminiHealth">Gemini —</b><span>Research</span></div>
+   </div>
+   <div class="actions"><button onclick="testPolymarket()">Test Polymarket</button></div>
+   <div id="connectionStatus" class="status">Ready.</div>
+  </section>
+
+  <section class="card c8">
+   <h2>4. Google Gemini</h2>
+   <div class="row3">
+    <div><label>API key — RAM only</label><input id="apiKey" type="password" autocomplete="off" placeholder="Paste Gemini API key"></div>
+    <div><label>Model</label><select id="model"><option value="gemini-3.8-flash" selected>gemini-3.8-flash</option><option value="gemini-3.6-flash">gemini-3.6-flash</option><option value="gemini-3.5-flash">gemini-3.5-flash</option></select></div>
+    <div><label>Google Search grounding</label><select id="grounding"><option value="on" selected>ON</option><option value="off">OFF</option></select></div>
+   </div>
+   <div class="actions"><button class="primary" onclick="testGemini()">Test Gemini</button><button onclick="forgetKey()">Forget Key</button></div>
+   <div id="geminiStatus" class="status">Key is not written to logs or browser storage.</div>
+  </section>
+
+  <section class="card c5">
+   <h2>5. Reaction Radar Settings</h2>
+   <div class="row">
+    <div><label>Game</label><select id="gameFilter"><option value="all">All eSports</option><option value="cs2">CS2</option><option value="lol">League of Legends</option><option value="dota2">Dota 2</option><option value="valorant">Valorant</option><option value="r6">Rainbow Six</option><option value="mlbb">Mobile Legends</option></select></div>
+    <div><label>Market type</label><select id="typeFilter"><option value="all">All</option><option value="moneyline">Match winner</option><option value="map">Map / game</option><option value="spread">Spread</option><option value="total">Total</option><option value="other">Other</option></select></div>
+   </div>
+   <div class="row4">
+    <div><label>Min liquidity $</label><input id="minLiq" type="number" value="300" min="0"></div>
+    <div><label>Min |1h move| pp</label><input id="minMove" type="number" value="0" min="0" step="0.5"></div>
+    <div><label>Max Gamma spread pp</label><input id="maxSpread" type="number" value="20" min="0" step="1"></div>
+    <div><label>Start window h</label><input id="startWindow" type="number" value="24" min="1"></div>
+   </div>
+   <div class="sep"></div>
+   <div class="row3">
+    <div><label>Target liquidity $</label><input id="targetLiq" type="number" value="2000" min="1"></div>
+    <div><label>Max useful spread pp</label><input id="usefulSpread" type="number" value="12" min="1"></div>
+    <div><label>Reaction move pp</label><input id="reactionMove" type="number" value="3" min="0.5" step="0.5"></div>
+   </div>
+   <div class="tiny">Всички thresholds са TEST HEURISTICS / NEEDS BACKTEST.</div>
+   <div class="actions"><button class="primary" onclick="discover()">SCAN ESPORTS</button><button onclick="showAll()">Show All Loaded</button></div>
+   <div id="discoverStatus" class="status">Official Gamma public-search with q parameter.</div>
+   <div class="sep"></div>
+   <label>Exact Polymarket event URL or slug</label><input id="exactEvent" placeholder="https://polymarket.com/event/...">
+   <div class="actions"><button onclick="loadExactEvent()">Load Exact Event</button></div>
+  </section>
+
+  <section class="card c7">
+   <h2>6. Candidate Markets / Reaction Priority</h2>
+   <div id="marketList" class="marketlist"><div class="status">Run SCAN ESPORTS.</div></div>
+  </section>
+
+  <section class="card c6">
+   <h2>7. Selected Market / Resolution</h2>
+   <div id="selectedMarket"><div class="status">Select a candidate market.</div></div>
+   <div class="actions"><button onclick="refreshBook()">Refresh CLOB</button><button onclick="startWatch()">Start 15s Watch</button><button onclick="stopWatch()">Stop Watch</button><button onclick="openMarket()">Open Polymarket</button></div>
+   <div id="bookStatus" class="status"></div>
+  </section>
+
+  <section class="card c6">
+   <h2>8. Gemini Match Research</h2>
+   <div class="row">
+    <div><label>Outcome to evaluate</label><select id="outcomeSelect" onchange="onOutcomeChange()"></select></div>
+    <div><label>Research depth</label><select id="depth"><option value="fast">FAST</option><option value="normal" selected>NORMAL</option><option value="deep">DEEP</option></select></div>
+   </div>
+   <label>Manual known facts / official URLs</label><textarea id="notes" placeholder="Optional: official roster announcement, tournament page, stand-in, map veto..."></textarea>
+   <label>Research focus</label><textarea id="focus">Verify exact match identity, tournament and scheduled status; BO format; current roster and stand-ins; recent opponent-adjusted form; map/mode strengths where relevant; patch/meta context; postponement/cancellation/walkover information. Prefer official organizer/team/publisher sources and established esports statistics sources. Do not invent missing statistics.</textarea>
+   <div class="actions"><button class="primary" onclick="runAnalysis()">RUN RESEARCH + EDGE</button></div>
+   <div id="analysisStatus" class="status"></div>
+  </section>
+
+  <section class="card c12">
+   <h2>9. Early Reaction Engine</h2>
+   <div class="kpis">
+    <div class="kpi"><b id="kInfo">—</b><span>Info priority</span></div>
+    <div class="kpi"><b id="kExecution">—</b><span>Execution quality</span></div>
+    <div class="kpi"><b id="kResolution">—</b><span>Resolution clarity</span></div>
+    <div class="kpi"><b id="kReactionQuality">—</b><span>Reaction quality</span></div>
+    <div class="kpi"><b id="kFair">—</b><span>Fair probability</span></div>
+    <div class="kpi"><b id="kAsk">—</b><span>Executable ask</span></div>
+    <div class="kpi"><b id="kEdge">—</b><span>Raw edge</span></div>
+    <div class="kpi"><b id="kGate">—</b><span>Paper gate</span></div>
+   </div>
+   <div class="factorgrid">
+    <div class="factor"><b id="kState">UNTESTED</b><span>Market reaction state</span></div>
+    <div class="factor"><b id="kMove">—</b><span>Ask Δ from T0</span></div>
+    <div class="factor"><b id="kConf">—</b><span>Confidence</span></div>
+    <div class="factor"><b id="kDQ">—</b><span>Data quality</span></div>
+    <div class="factor"><b id="kRPriority">—</b><span>Market radar R</span></div>
+    <div class="factor"><b id="kLinked">NO</b><span>Inbox linked</span></div>
+   </div>
+   <div class="status">Reaction Quality = geometric mean of Novelty × Reliability × Urgency × Sensitivity × Execution Quality × Resolution Clarity. Това е experimental research score, не доказан edge.</div>
+  </section>
+
+  <section class="card c7">
+   <h2>10. Agent Output</h2><pre id="agentOutput">No analysis yet.</pre>
+  </section>
+
+  <section class="card c5">
+   <h2>11. Grounded Evidence</h2><div id="evidence"><div class="status">No Gemini grounded sources yet.</div></div>
+  </section>
+
+  <section class="card c12">
+   <h2>12. Repricing Watch</h2><div id="watchTable" class="status">No price snapshots yet.</div>
+  </section>
+
+  <section class="card c12">
+   <h2>13. Paper Log</h2>
+   <div class="actions"><button onclick="saveSignal()">Save Current Signal</button><button onclick="exportLogs()">Export JSON</button><button class="danger" onclick="clearLogs()">Clear Local Paper Log</button></div>
+   <div id="logTable" class="status">No saved signals.</div>
+  </section>
+ </div>
+</div>
+
+<script>
+const GAMMA="https://gamma-api.polymarket.com", CLOB="https://clob.polymarket.com";
+const STORE_INBOX="esports_v03_inbox", STORE_LOGS="esports_v03_logs";
+const SEARCHES={all:["Counter-Strike","CS2","League of Legends","Dota 2","Valorant","Rainbow Six","Mobile Legends"],cs2:["Counter-Strike","CS2"],lol:["League of Legends"],dota2:["Dota 2"],valorant:["Valorant"],r6:["Rainbow Six"],mlbb:["Mobile Legends"]};
+let allMarkets=[],visibleMarkets=[],selected=null,selectedEvent=null,books={},lastSignal=null,logs=[],watchSnapshots=[],watchTimer=null,inbox=[],selectedInboxId=null,currentImageData=null;
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const parse=x=>{try{return typeof x==="string"?JSON.parse(x):x}catch{return x}};
+const arr=x=>{const y=parse(x);return Array.isArray(y)?y:[]};
+const num=x=>{const y=Number(x);return Number.isFinite(y)?y:null};
+const pct=x=>num(x)!==null?(num(x)*100).toFixed(1)+"%":"—";
+const pp=x=>num(x)!==null?(num(x)*100).toFixed(1)+" pp":"—";
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const gm=scores=>{const x=scores.map(Number).filter(v=>Number.isFinite(v)).map(v=>clamp(v,0,100)/100);if(!x.length||x.some(v=>v<=0))return 0;return Math.round(100*Math.pow(x.reduce((a,b)=>a*b,1),1/x.length))};
+function uid(prefix){return prefix+"-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,7)}
+function nowLocalInput(){const d=new Date(),z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,16)}
+function saveLocal(){localStorage.setItem(STORE_INBOX,JSON.stringify(inbox));localStorage.setItem(STORE_LOGS,JSON.stringify(logs))}
+function loadLocal(){try{inbox=JSON.parse(localStorage.getItem(STORE_INBOX)||"[]")}catch{inbox=[]}try{logs=JSON.parse(localStorage.getItem(STORE_LOGS)||"[]")}catch{logs=[]}}
+function health(id,ok,label){const e=$(id);e.textContent=label;e.className=ok?"ok":"bad"}
+async function fetchJSON(url,options){const r=await fetch(url,options);let data=null;try{data=await r.json()}catch{}if(!r.ok)throw new Error(`HTTP ${r.status}${data?.detail?": "+data.detail:""}${data?.error?": "+data.error:""}`);return data}
+
+function gameOf(text){const t=(text||"").toLowerCase();if(/counter.?strike|\bcs2\b/.test(t))return"CS2";if(/league of legends|\blol\b/.test(t))return"LoL";if(/dota/.test(t))return"Dota 2";if(/valorant/.test(t))return"Valorant";if(/rainbow six|\br6\b/.test(t))return"Rainbow Six";if(/mobile legends|mlbb/.test(t))return"Mobile Legends";if(/rocket league/.test(t))return"Rocket League";if(/starcraft/.test(t))return"StarCraft";if(/overwatch/.test(t))return"Overwatch";return"eSports"}
+function typeOf(m,e){const s=String(m.sportsMarketType||"").toLowerCase(),t=((m.question||"")+" "+(m.slug||"")+" "+(e?.title||"")).toLowerCase();if(s.includes("spread")||/spread|handicap/.test(t))return"spread";if(s.includes("total")||/\bover\b|\bunder\b|total/.test(t))return"total";if(/\bmap\s*\d|\bgame\s*\d|map winner|game winner/.test(t))return"map";if(s.includes("moneyline")||/\bvs\.?\b|\bvs\b|match winner|winner/.test(t))return"moneyline";return"other"}
+function eventText(e,m){return [e?.title,e?.slug,e?.description,m?.question,m?.slug,JSON.stringify(e?.tags||[])].filter(Boolean).join(" ")}
+function activeTradeable(m,e){return m?.active!==false&&m?.closed!==true&&e?.closed!==true&&m?.acceptingOrders!==false&&arr(m?.clobTokenIds).length>0}
+function eventStart(m,e){const v=m.gameStartTime||m.eventStartTime||e?.eventStartTime||m.startDate||e?.startDate,t=v?Date.parse(v):NaN;return Number.isFinite(t)?t:null}
+function hoursToStart(m,e){const t=eventStart(m,e);return t===null?null:(t-Date.now())/3600000}
+function reactionScore(m){const liq=Math.max(0,num(m.liquidityNum||m.liquidity)||0),vol=Math.max(0,num(m.volume24hr||m.volume24hrClob)||0),move=Math.abs(num(m.oneHourPriceChange)||0),day=Math.abs(num(m.oneDayPriceChange)||0),spread=Math.abs(num(m.spread)||0),hrs=hoursToStart(m,m._event);let s=0;s+=clamp(Math.log10(liq+1)*8,0,32);s+=clamp(Math.log10(vol+1)*5,0,22);s+=clamp(move*350,0,22);s+=clamp(day*80,0,10);if(hrs!==null&&hrs>=0&&hrs<=24)s+=clamp(12-(hrs/2),2,12);if(spread>0)s-=clamp(spread*100,0,12);return Math.round(clamp(s,0,100))}
+
+/* MOBILE INBOX */
+$("inTime").value=nowLocalInput();
+$("inImage").addEventListener("change",async ev=>{const f=ev.target.files?.[0];currentImageData=null;const p=$("imagePreview");p.style.display="none";if(!f)return;if(f.size>5*1024*1024){$("captureStatus").innerHTML='<span class="bad">Screenshot >5 MB. Избери по-малък файл.</span>';ev.target.value="";return}const data=await fileToBase64(f);currentImageData={mime_type:f.type||"image/jpeg",data:data.split(",")[1],name:f.name,size:f.size};p.src=data;p.style.display="block"});
+$("inboxImport").addEventListener("change",async ev=>{const f=ev.target.files?.[0];if(!f)return;try{const x=JSON.parse(await f.text()),items=Array.isArray(x)?x:(x.inbox||[]);if(!Array.isArray(items))throw new Error("No inbox array");inbox=[...inbox,...items];saveLocal();renderInbox();$("captureStatus").innerHTML=`<span class="ok">Imported ${items.length} inbox items.</span>`}catch(e){$("captureStatus").innerHTML='<span class="bad">'+esc(e.message)+'</span>'}ev.target.value=""});
+function fileToBase64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
+function extractPolyUrl(text){const m=String(text||"").match(/https?:\/\/(?:www\.)?polymarket\.com\/event\/[^\s?#]+/i);return m?m[0]:null}
+function saveInbox(){
+ const note=$("inNote").value.trim(),url=$("inUrl").value.trim();if(!note&&!url&&!currentImageData){$("captureStatus").innerHTML='<span class="bad">Добави note, URL или screenshot.</span>';return null}
+ const item={id:uid("ES-INBOX"),created_at:new Date().toISOString(),observed_at:$("inTime").value?new Date($("inTime").value).toISOString():new Date().toISOString(),game:$("inGame").value,source_type:$("inSource").value,note,url,polymarket_url:extractPolyUrl(url+" "+note),screenshot_name:currentImageData?.name||null,status:"NEW",triage:null,linked_market:null};
+ inbox.unshift(item);selectedInboxId=item.id;saveLocal();renderInbox();renderInboxDetail();$("captureStatus").innerHTML=`<span class="ok">${esc(item.id)} saved locally.</span>`;return item
+}
+async function saveAndTriage(){const item=saveInbox();if(item)await triageInboxItem(item)}
+function clearCapture(){$("inNote").value="";$("inUrl").value="";$("inGame").value="Auto";$("inSource").value="UNKNOWN";$("inTime").value=nowLocalInput();$("inImage").value="";currentImageData=null;$("imagePreview").style.display="none"}
+function renderInbox(){
+ const sf=$("inboxFilter").value,tf=$("triggerFilter").value;let items=inbox.filter(x=>(sf==="ALL"||x.status===sf)&&(tf==="ALL"||(x.triage?.trigger_type||"UNCLASSIFIED")===tf));
+ if(!items.length){$("inboxList").innerHTML='<div class="status">Inbox е празен за този филтър.</div>';return}
+ $("inboxList").innerHTML=items.map(x=>`<div class="inbox ${x.id===selectedInboxId?"sel":""}" onclick="selectInbox('${x.id}')"><span class="score">${x.triage?.info_priority??"—"}</span><div class="q">${esc(x.note||x.url||x.screenshot_name||"Inbox item")}</div><div class="meta"><span class="pill">${esc(x.status)}</span><span class="pill">${esc(x.triage?.trigger_type||"UNCLASSIFIED")}</span><span class="pill">${esc(x.game)}</span>${esc(new Date(x.observed_at).toLocaleString())}</div></div>`).join("")
+}
+function selectInbox(id){selectedInboxId=id;renderInbox();renderInboxDetail()}
+function currentInbox(){return inbox.find(x=>x.id===selectedInboxId)||null}
+function renderInboxDetail(){
+ const x=currentInbox();if(!x){$("inboxDetail").innerHTML='<div class="status">Избери Inbox item.</div>';["fNovelty","fReliability","fUrgency","fSensitivity","fInfoPriority","fImpact"].forEach(id=>$(id).textContent="—");return}
+ const t=x.triage;
+ $("inboxDetail").innerHTML=`<b>${esc(x.id)}</b><br><b>Observed:</b> ${esc(new Date(x.observed_at).toLocaleString())}<br><b>Source:</b> ${esc(x.source_type)}<br><b>Note:</b> ${esc(x.note||"—")}<br><b>URL:</b> ${x.url?`<a target="_blank" rel="noopener" href="${esc(x.url)}">${esc(x.url)}</a>`:"—"}<br><b>Screenshot:</b> ${esc(x.screenshot_name||"—")}<br><b>Polymarket:</b> ${esc(x.polymarket_url||"—")}${t?`<div class="sep"></div><b>Trigger:</b> ${esc(t.trigger_type)}<br><b>Summary:</b> ${esc(t.summary||"")}<br><b>Direction hint:</b> ${esc(t.direction_hint||"UNKNOWN")}<br><b>Missing verification:</b> ${esc((t.unverified_or_missing||[]).join(" | "))}`:""}`;
+ $("fNovelty").textContent=t?.novelty??"—";$("fReliability").textContent=t?.source_reliability??"—";$("fUrgency").textContent=t?.timing_urgency??"—";$("fSensitivity").textContent=t?.market_sensitivity??"—";$("fInfoPriority").textContent=t?.info_priority??"—";$("fImpact").textContent=t?.materiality??"—";
+}
+async function triageSelectedInbox(){const x=currentInbox();if(!x){$("triageStatus").innerHTML='<span class="bad">Select inbox item.</span>';return}await triageInboxItem(x)}
+async function triageInboxItem(item){
+ if(!$("apiKey").value.trim()){$("triageStatus").innerHTML='<span class="bad">Paste Gemini API key first.</span>';return}
+ $("triageStatus").textContent="Gemini triage + Google Search...";
+ const prompt=`You are the MOBILE INBOX TRIAGE layer for ESPORTS AGENT v0.3. This is RESEARCH/PAPER only.
+Classify the incoming note/screenshot/URL. Do not assume it is true.
+Use Google Search where useful. Prefer official organizer, team/player, publisher, or established esports statistics/news sources.
+Separate verified evidence from rumor. If a Polymarket event URL is visible/provided, return it exactly.
+Score four EXPERIMENTAL research factors from 0-100:
+- novelty: how new/non-routine the information appears;
+- source_reliability: quality of evidence currently found;
+- timing_urgency: how quickly it may matter before/during the event;
+- market_sensitivity: how plausibly material this kind of information is to match probability.
+These are triage scores, NOT proof of market edge.
+
+INPUT:
+game_hint=${item.game}
+source_type=${item.source_type}
+observed_at=${item.observed_at}
+note=${item.note||"None"}
+url=${item.url||"None"}
+screenshot_present=${!!currentImageData && currentImageData.name===item.screenshot_name}
+
+Return ONLY JSON:
+{
+ "trigger_type":"ROSTER_CHANGE|STAND_IN|MAP_VETO|MATCH_DELAY|WALKOVER_FORFEIT|PATCH_META|OFFICIAL_ANNOUNCEMENT|PRICE_MOVE|LIVE_STATE|OTHER",
+ "entities":[],
+ "summary":"",
+ "materiality":"HIGH|MEDIUM|LOW|UNKNOWN",
+ "direction_hint":"text or UNKNOWN",
+ "novelty":0,
+ "source_reliability":0,
+ "timing_urgency":0,
+ "market_sensitivity":0,
+ "confirmed_facts":[],
+ "estimated_facts":[],
+ "unverified_or_missing":[],
+ "polymarket_url":"",
+ "suggested_search_terms":[],
+ "timestamp":"${new Date().toISOString()}"
+}`;
+ try{
+   const image=(currentImageData&&currentImageData.name===item.screenshot_name)?currentImageData:null;
+   const r=await geminiCall(prompt,true,image),t=parseJSONText(r.text);
+   t.novelty=clamp(Number(t.novelty||0),0,100);t.source_reliability=clamp(Number(t.source_reliability||0),0,100);t.timing_urgency=clamp(Number(t.timing_urgency||0),0,100);t.market_sensitivity=clamp(Number(t.market_sensitivity||0),0,100);
+   t.info_priority=gm([t.novelty,t.source_reliability,t.timing_urgency,t.market_sensitivity]);
+   item.triage=t;item.status="TRIAGED";item.polymarket_url=t.polymarket_url||item.polymarket_url||null;item.triage_grounding=grounding(r.grounding);saveLocal();renderInbox();renderInboxDetail();$("triageStatus").innerHTML=`<span class="ok">Triaged. Info Priority ${t.info_priority}/100. Experimental / needs backtest.</span>`
+ }catch(e){$("triageStatus").innerHTML='<span class="bad">'+esc(e.message)+'</span>'}
+}
+function loadInboxPolymarket(){const x=currentInbox();if(!x)return;const u=x.polymarket_url||extractPolyUrl((x.url||"")+" "+(x.note||""));if(!u){$("triageStatus").innerHTML='<span class="warn">No Polymarket event URL found. Use Radar scan or paste exact event URL.</span>';return}$("exactEvent").value=u;loadExactEvent().then(()=>{x.status="LINKED";saveLocal();renderInbox();renderInboxDetail()})}
+function linkInboxToSelectedMarket(){const x=currentInbox();if(!x){$("triageStatus").innerHTML='<span class="bad">Select inbox item.</span>';return}if(!selected||!selectedEvent?.slug){$("triageStatus").innerHTML='<span class="warn">Select exact Polymarket market first.</span>';return}x.status="LINKED";x.linked_market={event_slug:selectedEvent.slug,question:selected.question,condition_id:selected.conditionId,outcome:null};saveLocal();renderInbox();renderInboxDetail();updateEarlyReaction();$("triageStatus").innerHTML='<span class="ok">Inbox item linked to selected Polymarket market.</span>'}
+function markInboxDone(){const x=currentInbox();if(!x)return;x.status="DONE";saveLocal();renderInbox();renderInboxDetail();updateEarlyReaction()}
+function exportInbox(){downloadJSON(`esports-v0.3-inbox-${new Date().toISOString().slice(0,10)}.json`,{schema:"ESPORTS_V03_MOBILE_INBOX",exported_at:new Date().toISOString(),inbox})}
+function importInboxPrompt(){$("inboxImport").click()}
+
+/* CONNECTIONS & RADAR */
+async function testPolymarket(){$("connectionStatus").textContent="Testing official APIs...";let g=false,c=false;try{const s=await fetchJSON(`${GAMMA}/public-search?q=${encodeURIComponent("Counter-Strike")}&limit_per_type=3`);g=Array.isArray(s.events);if(g){let token=null;outer:for(const e of s.events||[])for(const m of e.markets||[]){const ids=arr(m.clobTokenIds);if(ids[0]){token=ids[0];break outer}}if(token){const b=await fetchJSON(`${CLOB}/book?token_id=${encodeURIComponent(token)}`);c=!!b}}}catch(e){$("connectionStatus").innerHTML='<span class="bad">'+esc(e.message)+'</span>'}health("gammaHealth",g,g?"Gamma OK":"Gamma FAIL");health("clobHealth",c,c?"CLOB OK":"CLOB —");if(g)$("connectionStatus").innerHTML='<span class="ok">Polymarket public data reachable.</span>'}
+async function testGemini(){if(!$("apiKey").value.trim()){$("geminiStatus").innerHTML='<span class="bad">Paste API key first.</span>';return}$("geminiStatus").textContent="Testing...";try{const r=await geminiCall("Reply only with ESPORTS_AGENT_OK.",false,null),ok=r.text.includes("ESPORTS_AGENT_OK");health("geminiHealth",ok,ok?"Gemini OK":"Gemini ?");$("geminiStatus").innerHTML=ok?'<span class="ok">Gemini connected.</span>':'<span class="warn">API responded but returned unexpected text.</span>'}catch(e){health("geminiHealth",false,"Gemini FAIL");$("geminiStatus").innerHTML='<span class="bad">'+esc(e.message)+'</span>'}}
+function forgetKey(){$("apiKey").value="";$("geminiStatus").textContent="Key cleared from this page.";health("geminiHealth",false,"Gemini —")}
+
+async function discover(){stopWatch();allMarkets=[];selected=null;$("marketList").innerHTML='<div class="status">Searching...</div>';$("discoverStatus").textContent="Querying Gamma public-search...";const terms=SEARCHES[$("gameFilter").value]||SEARCHES.all;let errors=[];for(const q of terms){try{const s=await fetchJSON(`${GAMMA}/public-search?q=${encodeURIComponent(q)}&limit_per_type=25`);for(const e of (s.events||[]))for(const m of (e.markets||[]))if(activeTradeable(m,e))allMarkets.push({...m,_event:e,_game:gameOf(eventText(e,m)),_type:typeOf(m,e)})}catch(e){errors.push(`${q}: ${e.message}`)}}const uniq=new Map();for(const m of allMarkets)uniq.set(m.id||m.conditionId||m.slug,m);allMarkets=[...uniq.values()];if(!allMarkets.length){try{const ms=await fetchJSON(`${GAMMA}/markets?active=true&closed=false&limit=300`);for(const m of ms||[]){const text=eventText(null,m).toLowerCase();if(/counter.?strike|\bcs2\b|league of legends|\blol\b|\bdota\b|valorant|rainbow six|mobile legends|esports/.test(text)&&activeTradeable(m,null))allMarkets.push({...m,_event:(arr(m.events)[0]||null),_game:gameOf(text),_type:typeOf(m,arr(m.events)[0])})}}catch(e){errors.push("fallback: "+e.message)}}applyFilters();health("gammaHealth",allMarkets.length>0,allMarkets.length?"Gamma OK":"Gamma ?");$("discoverStatus").innerHTML=`<span class="${allMarkets.length?"ok":"warn"}">${allMarkets.length} tradeable eSports markets loaded; ${visibleMarkets.length} pass filters.</span>`+(errors.length?`<br><span class="tiny">${esc(errors.slice(0,3).join(" | "))}</span>`:"")}
+function applyFilters(){const type=$("typeFilter").value,minL=Number($("minLiq").value||0),minM=Number($("minMove").value||0)/100,maxS=Number($("maxSpread").value||999)/100,win=Number($("startWindow").value||24);visibleMarkets=allMarkets.filter(m=>{if(type!=="all"&&m._type!==type)return false;const liq=num(m.liquidityNum||m.liquidity)||0;if(liq<minL)return false;const mov=Math.abs(num(m.oneHourPriceChange)||0);if(mov<minM)return false;const spr=Math.abs(num(m.spread)||0);if(spr>0&&spr>maxS)return false;const h=hoursToStart(m,m._event);if(h!==null&&h>win)return false;return true}).sort((a,b)=>reactionScore(b)-reactionScore(a));renderMarkets()}
+function showAll(){visibleMarkets=[...allMarkets].sort((a,b)=>reactionScore(b)-reactionScore(a));renderMarkets()}
+function renderMarkets(){if(!visibleMarkets.length){$("marketList").innerHTML='<div class="status">No markets pass filters. Lower filters or use exact event URL.</div>';return}$("marketList").innerHTML=visibleMarkets.map((m,i)=>{const o=arr(m.outcomes),p=arr(m.outcomePrices),liq=num(m.liquidityNum||m.liquidity)||0,move=num(m.oneHourPriceChange),h=hoursToStart(m,m._event);return `<div class="market" id="mk_${i}" onclick="selectMarket(${i})"><span class="score">R${reactionScore(m)}</span><div class="q">${esc(m.question||m._event?.title||"Untitled")}</div><div class="meta"><span class="pill">${esc(m._game)}</span><span class="pill">${esc(m._type)}</span>${esc(o.map((x,j)=>`${x} ${p[j]!==undefined?pct(p[j]):""}`).join(" · "))}<br>Liq $${liq.toLocaleString(undefined,{maximumFractionDigits:0})}${move!==null?` · 1h ${move>=0?"+":""}${(move*100).toFixed(1)}pp`:""}${h!==null?` · start ${h>=0?h.toFixed(1)+"h":"LIVE/past"}`:""}</div></div>`}).join("")}
+function slugFrom(v){v=v.trim();try{if(v.startsWith("http")){const u=new URL(v),a=u.pathname.split("/").filter(Boolean),k=a.indexOf("event");if(k>=0&&a[k+1])return a[k+1]}}catch{}return v.replace(/^\/+|\/+$/g,"")}
+async function loadExactEvent(){stopWatch();const slug=slugFrom($("exactEvent").value);if(!slug)return;$("discoverStatus").textContent="Loading exact event...";try{const e=await fetchJSON(`${GAMMA}/events/slug/${encodeURIComponent(slug)}`);allMarkets=(e.markets||[]).filter(m=>activeTradeable(m,e)).map(m=>({...m,_event:e,_game:gameOf(eventText(e,m)),_type:typeOf(m,e)}));visibleMarkets=[...allMarkets].sort((a,b)=>reactionScore(b)-reactionScore(a));renderMarkets();$("discoverStatus").innerHTML=`<span class="ok">Exact event loaded: ${allMarkets.length} tradeable markets.</span>`}catch(e){$("discoverStatus").innerHTML='<span class="bad">'+esc(e.message)+'</span>'}}
+function selectMarket(i){stopWatch();selected=visibleMarkets[i];selectedEvent=selected._event;books={};watchSnapshots=[];lastSignal=null;document.querySelectorAll(".market").forEach(x=>x.classList.remove("sel"));$("mk_"+i)?.classList.add("sel");const o=arr(selected.outcomes);$("outcomeSelect").innerHTML=o.map((x,j)=>`<option value="${j}">${j}: ${esc(x)}</option>`).join("");renderSelected();renderWatch();refreshBook();["kFair","kAsk","kEdge","kConf","kDQ","kGate","kExecution","kResolution","kReactionQuality"].forEach(id=>$(id).textContent="—");$("kRPriority").textContent="R"+reactionScore(selected);$("agentOutput").textContent="No analysis yet.";$("evidence").innerHTML='<div class="status">No Gemini grounded sources yet.</div>';updateEarlyReaction()}
+function renderSelected(){if(!selected)return;const e=selectedEvent||{},rules=selected.description||e.description||"No description returned in this payload.",src=selected.resolutionSource||e.resolutionSource||"Not separately supplied — verify rules text",start=selected.gameStartTime||selected.eventStartTime||e.eventStartTime||selected.startDate||e.startDate||"—",end=selected.endDate||e.endDate||"—";$("selectedMarket").innerHTML=`<b>${esc(selected.question||e.title)}</b><div class="tiny">${esc(e.title||"")} · ${esc(selected._game)} · ${esc(selected._type)}</div><div class="sep"></div><b>Resolution source:</b> ${esc(src)}<br><b>Game/Event start:</b> ${esc(start)}<br><b>Market end:</b> ${esc(end)}<br><b>Accepting orders:</b> ${esc(selected.acceptingOrders)}<br><b>Condition ID:</b> <span class="tiny">${esc(selected.conditionId||"—")}</span><div class="sep"></div><b>Rules:</b><pre>${esc(rules)}</pre>`}
+function onOutcomeChange(){watchSnapshots=[];renderWatch();refreshBook()}
+
+async function refreshBook(){if(!selected)return;const ids=arr(selected.clobTokenIds),idx=Number($("outcomeSelect").value||0),tok=ids[idx];if(!tok){$("bookStatus").innerHTML='<span class="bad">No CLOB token for selected outcome.</span>';return}$("bookStatus").textContent="Loading orderbook...";try{const b=await fetchJSON(`${CLOB}/book?token_id=${encodeURIComponent(tok)}`);books[idx]=b;const bids=(b.bids||[]).map(x=>({p:num(x.price),s:num(x.size)})).filter(x=>x.p!==null&&x.s!==null),asks=(b.asks||[]).map(x=>({p:num(x.price),s:num(x.size)})).filter(x=>x.p!==null&&x.s!==null),bid=bids.length?Math.max(...bids.map(x=>x.p)):null,ask=asks.length?Math.min(...asks.map(x=>x.p)):null,spread=bid!==null&&ask!==null?ask-bid:null,mid=bid!==null&&ask!==null?(bid+ask)/2:null,snap={timestamp:new Date().toISOString(),outcome:arr(selected.outcomes)[idx],token_id:tok,best_bid:bid,best_ask:ask,midpoint:mid,spread};watchSnapshots.push(snap);renderWatch();health("clobHealth",true,"CLOB OK");$("bookStatus").innerHTML=`<span class="ok">Bid ${pct(bid)} · Ask ${pct(ask)} · Spread ${pp(spread)} · snapshots ${watchSnapshots.length}</span>`;updateEarlyReaction()}catch(e){health("clobHealth",false,"CLOB FAIL");$("bookStatus").innerHTML='<span class="bad">'+esc(e.message)+'</span>'}}
+function bestBook(){if(!selected)return null;const idx=Number($("outcomeSelect").value||0),b=books[idx];if(!b)return null;const bids=(b.bids||[]).map(x=>num(x.price)).filter(x=>x!==null),asks=(b.asks||[]).map(x=>num(x.price)).filter(x=>x!==null),bid=bids.length?Math.max(...bids):null,ask=asks.length?Math.min(...asks):null;return{bid,ask,spread:(bid!==null&&ask!==null)?ask-bid:null}}
+function startWatch(){if(!selected||watchTimer)return;watchTimer=setInterval(refreshBook,15000);$("bookStatus").innerHTML+='<br><span class="cyan">15s watch active.</span>'}
+function stopWatch(){if(watchTimer){clearInterval(watchTimer);watchTimer=null}}
+function renderWatch(){if(!watchSnapshots.length){$("watchTable").textContent="No price snapshots yet.";updateEarlyReaction();return}const first=watchSnapshots[0];$("watchTable").innerHTML=`<table><thead><tr><th>Time</th><th>Outcome</th><th>Bid</th><th>Ask</th><th>Spread</th><th>Ask Δ vs T0</th></tr></thead><tbody>`+watchSnapshots.slice(-30).reverse().map(x=>`<tr><td>${esc(new Date(x.timestamp).toLocaleTimeString())}</td><td>${esc(x.outcome)}</td><td>${pct(x.best_bid)}</td><td>${pct(x.best_ask)}</td><td>${pp(x.spread)}</td><td>${x.best_ask!==null&&first.best_ask!==null?pp(x.best_ask-first.best_ask):"—"}</td></tr>`).join("")+`</tbody></table>`;updateEarlyReaction()}
+function openMarket(){if(selectedEvent?.slug)window.open(`https://polymarket.com/event/${selectedEvent.slug}`,"_blank")}
+
+/* GEMINI */
+async function geminiCall(prompt,ground=true,image=null){
+ const key=$("apiKey").value.trim();if(!key)throw new Error("Gemini API key missing.");
+ const parts=[{text:prompt}];if(image)parts.push({inline_data:{mime_type:image.mime_type,data:image.data}});
+ const body={contents:[{role:"user",parts}],generationConfig:{temperature:0.12}};
+ if(ground&&$("grounding").value==="on")body.tools=[{google_search:{}}];
+ const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent($("model").value)}:generateContent`,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},body:JSON.stringify(body)});
+ const data=await r.json();if(!r.ok)throw new Error(data?.error?.message||`Gemini HTTP ${r.status}`);const c=data.candidates?.[0],text=(c?.content?.parts||[]).map(p=>p.text||"").join("").trim();if(!text)throw new Error("Gemini returned no text.");return{text,grounding:c?.groundingMetadata||null}
+}
+function parseJSONText(t){t=t.trim().replace(/^```json\s*/i,"").replace(/^```\s*/,"").replace(/```$/,"").trim();try{return JSON.parse(t)}catch{}const a=t.indexOf("{"),b=t.lastIndexOf("}");if(a>=0&&b>a)return JSON.parse(t.slice(a,b+1));throw new Error("Gemini response was not valid JSON.")}
+function grounding(g){return{queries:g?.webSearchQueries||[],sources:(g?.groundingChunks||[]).map(x=>({title:x.web?.title||"Source",url:x.web?.uri||""})).filter(x=>x.url)}}
+function renderEvidence(g){const z=grounding(g);if(!z.sources.length){$("evidence").innerHTML='<div class="status">No grounding sources returned for this call.</div>';return}$("evidence").innerHTML=(z.queries.length?`<div class="tiny">Queries: ${esc(z.queries.join(" | "))}</div>`:"")+z.sources.map(s=>`<div class="evidence"><b>${esc(s.title)}</b><br><a target="_blank" rel="noopener" href="${esc(s.url)}">${esc(s.url)}</a></div>`).join("")}
+function localGate(a,edge,ask,spread){const dq=Number(a.data_quality||0),cf=Number(a.confidence||0),rr=String(a.resolution_risk||"UNKNOWN").toUpperCase(),reasons=[];let gate="PAPER_CANDIDATE";if(ask===null){gate="REJECT";reasons.push("no executable ask")}if(rr==="HIGH"||rr==="UNKNOWN"){gate="REJECT";reasons.push("resolution risk high/unknown")}if(dq<50){gate="REJECT";reasons.push("data quality below test floor")}if(gate!=="REJECT"&&cf<55){gate="WATCH";reasons.push("low confidence")}if(gate!=="REJECT"&&spread!==null&&spread>0.10){gate="WATCH";reasons.push("wide spread")}if(gate!=="REJECT"&&edge!==null&&edge<0.03){gate="WATCH";reasons.push("small raw edge")}return{gate,reasons,threshold_status:"TEST_HEURISTICS_NEEDS_BACKTEST"}}
+function resolutionClarityScore(risk){return risk==="LOW"?90:risk==="MEDIUM"?60:risk==="HIGH"?25:20}
+function executionQuality(book,liq){if(!book||book.ask===null||book.bid===null)return 0;const maxSpread=Math.max(0.01,Number($("usefulSpread").value||12)/100),target=Math.max(1,Number($("targetLiq").value||2000)),spreadScore=100*clamp(1-(book.spread||0)/maxSpread,0,1),liqScore=100*clamp(Math.log1p(Math.max(0,liq||0))/Math.log1p(target),0,1);return Math.round(gm([spreadScore,liqScore]))}
+function marketReactionState(){if(watchSnapshots.length<2)return{state:"UNTESTED",delta:null};const a=watchSnapshots[0].best_ask,b=watchSnapshots[watchSnapshots.length-1].best_ask;if(a===null||b===null)return{state:"UNTESTED",delta:null};const d=b-a,t=Number($("reactionMove").value||3)/100;return{state:Math.abs(d)>=t?"MOVING":"STABLE",delta:d}}
+function linkedInboxForMarket(){const slug=selectedEvent?.slug;if(!slug)return null;return inbox.find(x=>x.status!=="DONE"&&((x.linked_market?.event_slug&&x.linked_market.event_slug===slug)||(x.polymarket_url&&slugFrom(x.polymarket_url)===slug)))||null}
+function updateEarlyReaction(){
+ const ib=linkedInboxForMarket(),t=ib?.triage,info=t?.info_priority??null,b=bestBook(),liq=num(selected?.liquidityNum||selected?.liquidity),exec=selected?executionQuality(b,liq):null,rr=lastSignal?.research?.resolution_risk||lastSignal?.research?.resolution_assessment_risk||null,res=rr?resolutionClarityScore(String(rr).toUpperCase()):null,rq=(t&&exec!==null&&res!==null)?gm([t.novelty,t.source_reliability,t.timing_urgency,t.market_sensitivity,exec,res]):null,mr=marketReactionState();
+ $("kInfo").textContent=info??"—";$("kExecution").textContent=exec??"—";$("kResolution").textContent=res??"—";$("kReactionQuality").textContent=rq??"—";$("kState").textContent=mr.state;$("kMove").textContent=mr.delta!==null?pp(mr.delta):"—";$("kLinked").textContent=ib?"YES":"NO";
+ return{inbox_item_id:ib?.id||null,info_priority:info,execution_quality:exec,resolution_clarity:res,reaction_quality:rq,market_reaction_state:mr.state,ask_delta_from_t0:mr.delta}
+}
+
+async function runAnalysis(){
+ if(!selected){$("analysisStatus").innerHTML='<span class="bad">Select a market first.</span>';return}
+ if(!$("apiKey").value.trim()){$("analysisStatus").innerHTML='<span class="bad">Paste Gemini API key first.</span>';return}
+ await refreshBook();const idx=Number($("outcomeSelect").value||0),o=arr(selected.outcomes),ids=arr(selected.clobTokenIds),bk=bestBook(),ib=linkedInboxForMarket()||currentInbox();
+ const marketData={event:selectedEvent?.title||null,event_slug:selectedEvent?.slug||null,question:selected.question,game:selected._game,market_type:selected._type,selected_outcome:o[idx],selected_outcome_index:idx,token_id:ids[idx]||null,condition_id:selected.conditionId||null,rules:selected.description||selectedEvent?.description||null,resolution_source:selected.resolutionSource||selectedEvent?.resolutionSource||null,game_start:selected.gameStartTime||selected.eventStartTime||selectedEvent?.eventStartTime||selected.startDate||selectedEvent?.startDate||null,market_end:selected.endDate||selectedEvent?.endDate||null,liquidity:num(selected.liquidityNum||selected.liquidity),volume24h:num(selected.volume24hr||selected.volume24hrClob),gamma_1h_change:num(selected.oneHourPriceChange),gamma_1d_change:num(selected.oneDayPriceChange),gamma_spread:num(selected.spread),best_bid:bk?.bid??null,best_ask:bk?.ask??null,book_spread:bk?.spread??null,reaction_priority:reactionScore(selected)};
+ const inboxContext=ib?{id:ib.id,observed_at:ib.observed_at,note:ib.note,url:ib.url,triage:ib.triage}:null;
+ const prompt=`You are ESPORTS AGENT v0.3 in RESEARCH/PAPER mode.
+
+BOUNDARIES:
+1. MARKET_DATA came from Polymarket Gamma/CLOB and is authoritative for market identity, rules and current orderbook.
+2. INBOX_CONTEXT is a human/mobile observation. It is NOT automatically true. Verify it independently.
+3. Google Search is only for external esports evidence: exact teams/match, tournament, BO format, roster/stand-ins, recent form, map/mode evidence, patch/meta, schedule status, cancellation/postponement/walkover news.
+4. Prefer official organizer, publisher and team/player sources; then established esports stats/news.
+5. Do not invent unavailable statistics. Separate CONFIRMED, ESTIMATED and UNVERIFIED.
+6. Estimate fair_probability for selected_outcome only. This is experimental.
+7. Do NOT calculate edge; application calculates it locally from fair_probability and best_ask.
+8. Allowed dispositions: WATCH, PAPER_CANDIDATE, REJECT. No BUY/SELL/LIVE.
+9. Assess resolution risk from supplied Polymarket rules.
+10. Specifically assess whether INBOX_CONTEXT appears genuinely new/material and whether the market may already have repriced. Do not claim a latency edge without evidence.
+11. Research depth: ${$("depth").value}.
+
+MARKET_DATA:
+${JSON.stringify(marketData,null,2)}
+
+INBOX_CONTEXT:
+${JSON.stringify(inboxContext,null,2)}
+
+MANUAL_NOTES:
+${$("notes").value.trim()||"None"}
+
+RESEARCH_FOCUS:
+${$("focus").value.trim()}
+
+Return ONLY valid JSON:
+{
+ "game":"",
+ "tournament":"",
+ "match_identity":"",
+ "match_status":"PREMATCH|LIVE|FINISHED|UNKNOWN",
+ "format":"",
+ "selected_outcome":"",
+ "fair_probability":0.0,
+ "confidence":0,
+ "data_quality":0,
+ "resolution_risk":"LOW|MEDIUM|HIGH|UNKNOWN",
+ "model_disposition":"WATCH|PAPER_CANDIDATE|REJECT",
+ "edge_type_candidates":[],
+ "confirmed_facts":[],
+ "estimated_facts":[],
+ "unverified_or_missing":[],
+ "roster_assessment":"",
+ "recent_form_assessment":"",
+ "map_or_mode_assessment":"",
+ "patch_meta_assessment":"",
+ "inbox_verification":"CONFIRMED|PARTIAL|UNVERIFIED|CONTRADICTED|NONE",
+ "information_latency_assessment":"",
+ "resolution_assessment":"",
+ "key_risks":[],
+ "probability_reasoning_summary":"",
+ "what_would_change_probability":[],
+ "timestamp":"${new Date().toISOString()}"
+}`;
+ $("analysisStatus").textContent="Researching with Gemini + Google Search...";
+ try{
+   const r=await geminiCall(prompt,true,null),a=parseJSONText(r.text),fair=num(a.fair_probability),ask=bk?.ask??null,edge=fair!==null&&ask!==null?fair-ask:null,gate=localGate(a,edge,ask,bk?.spread??null);
+   lastSignal={signal_id:`ESPORTS-${new Date().toISOString().replace(/[-:.TZ]/g,"").slice(0,14)}`,agent:"ESPORTS_AGENT_v0.3",status:"RESEARCH_PAPER_ONLY",timestamp:new Date().toISOString(),market:marketData,inbox_context:inboxContext,research:a,calculated:{fair_probability:fair,executable_ask:ask,raw_edge:edge,best_bid:bk?.bid??null,spread:bk?.spread??null,confidence:Number(a.confidence||0),data_quality:Number(a.data_quality||0),market_reaction_priority:reactionScore(selected),paper_gate:gate.gate,gate_reasons:gate.reasons,threshold_status:gate.threshold_status},grounding:grounding(r.grounding)};
+   const er=updateEarlyReaction();lastSignal.early_reaction=er;
+   $("kFair").textContent=pct(fair);$("kAsk").textContent=pct(ask);$("kEdge").textContent=pp(edge);$("kConf").textContent=String(a.confidence??"—");$("kDQ").textContent=String(a.data_quality??"—");$("kGate").textContent=gate.gate;$("agentOutput").textContent=JSON.stringify(lastSignal,null,2);renderEvidence(r.grounding);$("analysisStatus").innerHTML='<span class="ok">Complete. Market price/edge/reaction score calculated locally.</span>';
+   if(ib){ib.status="LINKED";ib.linked_market={event_slug:selectedEvent?.slug,question:selected.question,condition_id:selected.conditionId,outcome:o[idx]};saveLocal();renderInbox();renderInboxDetail()}
+ }catch(e){$("analysisStatus").innerHTML='<span class="bad">'+esc(e.message)+'</span>';$("agentOutput").textContent=String(e.stack||e)}
+}
+
+/* LOGGING */
+function saveSignal(){if(!lastSignal){alert("Run an analysis first.");return}lastSignal.early_reaction=updateEarlyReaction();lastSignal.repricing_watch=[...watchSnapshots];logs.unshift(JSON.parse(JSON.stringify(lastSignal)));saveLocal();renderLogs()}
+function renderLogs(){if(!logs.length){$("logTable").textContent="No saved signals.";return}$("logTable").innerHTML=`<table><thead><tr><th>Time</th><th>Market</th><th>Inbox</th><th>Info</th><th>RQ</th><th>Fair</th><th>Ask</th><th>Edge</th><th>DQ</th><th>Gate</th></tr></thead><tbody>`+logs.map(x=>`<tr><td>${esc(new Date(x.timestamp).toLocaleString())}</td><td>${esc(x.market.question)}</td><td>${esc(x.early_reaction?.inbox_item_id||"—")}</td><td>${esc(x.early_reaction?.info_priority??"—")}</td><td>${esc(x.early_reaction?.reaction_quality??"—")}</td><td>${pct(x.calculated.fair_probability)}</td><td>${pct(x.calculated.executable_ask)}</td><td>${pp(x.calculated.raw_edge)}</td><td>${esc(x.calculated.data_quality)}</td><td>${esc(x.calculated.paper_gate)}</td></tr>`).join("")+`</tbody></table>`}
+function downloadJSON(name,obj){const blob=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
+function exportLogs(){downloadJSON(`esports-agent-v0.3-paper-${new Date().toISOString().slice(0,10)}.json`,{schema:"ESPORTS_AGENT_V03_PAPER_LOG",exported_at:new Date().toISOString(),signals:logs,current_watch:watchSnapshots})}
+function clearLogs(){if(confirm("Clear local paper log on this device?")){logs=[];saveLocal();renderLogs()}}
+
+/* STARTUP */
+loadLocal();renderInbox();renderLogs();renderInboxDetail();
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}))}
+</script>
+</body>
+</html>
